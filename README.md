@@ -13,6 +13,6 @@ For more details, see our paper: Balancing Efficiency and Unpredictability in Mu
 `python MARL_patrol/main.py --patrol_mode synchronous`
 
 ### Use concurrent bayesian learning strategy to patrol:
-`python CBLS_patrol/main`
+`python CBLS_patrol/main.py`
   
 
