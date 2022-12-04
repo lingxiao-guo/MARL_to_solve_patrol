@@ -4,3 +4,15 @@ Patrolling with multiple robots is a challenging task. While the robots collabor
 
 ## Paper
 For more details, see our paper: Balancing Efficiency and Unpredictability in Multi-robot Patrolling: An MARL-Based Approach. The paper is submitted to ICRA2022.
+
+## Run
+### Train for asynchronous patrol:
+`python MARL_patrol/main.py --patrol_mode asynchronous `
+
+### Train for synchronous patrol:
+`python MARL_patrol/main.py --patrol_mode synchronous`
+
+### Use concurrent bayesian learning strategy to patrol:
+`python CBLS_patrol/main`
+  
+
