@@ -5,18 +5,17 @@ Created on Fri Feb  7 11:14:44 2020
 @author: amris
 """
 import math
-
-import skgeom as sg
-import numpy as np
-from matplotlib import pyplot as plt
 import sys
+
+import numpy as np
+
 sys.path.append("..")
 from Env.SupplementforEnv.constants import CONSTANTS as K
 from matplotlib.path import Path
-from collections import defaultdict
 from functools import partial
 from collections import defaultdict
 from heapq import *
+
 CONST = K()
 
 import time
@@ -74,7 +73,7 @@ class Obstacle:
 
         obsMaps.append(mp)
         vsbs.append(vsb)
-        
+
         vsbPoly = self.getVisibilityPolys(vsb, mp)
         vsbPolys.append(vsbPoly)
         numOpenCellsArr.append(np.count_nonzero(mp == 0))
@@ -86,7 +85,6 @@ class Obstacle:
     def getObstacleMap(self, emptyMap, obstacleSet):
         obsList = obstacleSet
         vsb = Visibility(emptyMap.shape[0], emptyMap.shape[1])
-
 
         for obs, isHole in obsList:
             vsb.addGeom2Arrangement(obs)
@@ -126,15 +124,14 @@ class Obstacle:
 
     def get_allnodes_matrix(self):
 
-
-        neighbor_matrix=np.zeros((34,34),np.int32)
-        neighbor_matrix[0,1]=14
-        neighbor_matrix[1,2]=8
+        neighbor_matrix = np.zeros((34, 34), np.int32)
+        neighbor_matrix[0, 1] = 14
+        neighbor_matrix[1, 2] = 8
         neighbor_matrix[1, 7] = 8
         neighbor_matrix[2, 3] = 9
         neighbor_matrix[2, 15] = 21
         neighbor_matrix[3, 9] = 10
-        neighbor_matrix[8,9] = 5
+        neighbor_matrix[8, 9] = 5
         neighbor_matrix[3, 4] = 9
         neighbor_matrix[4, 17] = 21
         neighbor_matrix[16, 17] = 8
@@ -148,7 +145,7 @@ class Obstacle:
         neighbor_matrix[6, 7] = 7
         neighbor_matrix[5, 11] = 10
         neighbor_matrix[10, 11] = 4
-        neighbor_matrix[10, 27] =7
+        neighbor_matrix[10, 27] = 7
         neighbor_matrix[26, 27] = 4
         neighbor_matrix[25, 27] = 5
         neighbor_matrix[26, 28] = 8
@@ -168,108 +165,105 @@ class Obstacle:
         neighbor_matrix[18, 33] = 10
         neighbor_matrix[32, 33] = 8
 
-        self.neighbor_matrix=neighbor_matrix+neighbor_matrix.T
-        self.neighbor_matrix=np.where(self.neighbor_matrix==0,math.inf,self.neighbor_matrix)
-        for i in range(np.size(self.neighbor_matrix,0)):
-            self.neighbor_matrix[i][i]=0
+        self.neighbor_matrix = neighbor_matrix + neighbor_matrix.T
+        self.neighbor_matrix = np.where(self.neighbor_matrix == 0, math.inf, self.neighbor_matrix)
+        for i in range(np.size(self.neighbor_matrix, 0)):
+            self.neighbor_matrix[i][i] = 0
 
         self.edges = []
-        for i in range(np.size(self.neighbor_matrix,0)):
-            for j in range(np.size(self.neighbor_matrix,1)):
+        for i in range(np.size(self.neighbor_matrix, 0)):
+            for j in range(np.size(self.neighbor_matrix, 1)):
                 if i != j and self.neighbor_matrix[i][j] != math.inf:
                     self.edges.append(
                         (i, j, self.neighbor_matrix[i][j]))
-        adj=np.zeros((20,20),dtype=int)
-        adj[0][1]=1
-        adj[1][2]=1
-        adj[1][5]=1
-        adj[2][3]=1
-        adj[2][8]=1
-        adj[3][6]=1
-        adj[3][10]=1
-        adj[4][7]=1
-        adj[4][15]=1
-        adj[5][7]=1
-        adj[7][15]=1
-        adj[7][8]=1
-        adj[7][18]=1
-        adj[8][9]=1
-        adj[8][18]=1
-        adj[9][10]=1
-        adj[9][12]=1
-        adj[10][11]=1
-        adj[11][12]=1
-        adj[11][19]=1
-        adj[12][19]=1
-        adj[13][14]=1
-        adj[13][19]=1
-        adj[14][19]=1
-        adj[15][16]=1
-        adj[15][17]=1
-        adj[18][19]=1
-        self.adj=adj+adj.T
+        adj = np.zeros((20, 20), dtype=int)
+        adj[0][1] = 1
+        adj[1][2] = 1
+        adj[1][5] = 1
+        adj[2][3] = 1
+        adj[2][8] = 1
+        adj[3][6] = 1
+        adj[3][10] = 1
+        adj[4][7] = 1
+        adj[4][15] = 1
+        adj[5][7] = 1
+        adj[7][15] = 1
+        adj[7][8] = 1
+        adj[7][18] = 1
+        adj[8][9] = 1
+        adj[8][18] = 1
+        adj[9][10] = 1
+        adj[9][12] = 1
+        adj[10][11] = 1
+        adj[11][12] = 1
+        adj[11][19] = 1
+        adj[12][19] = 1
+        adj[13][14] = 1
+        adj[13][19] = 1
+        adj[14][19] = 1
+        adj[15][16] = 1
+        adj[15][17] = 1
+        adj[18][19] = 1
+        self.adj = adj + adj.T
 
-
-
-
-    def get_key(self,val,my_dict):
+    def get_key(self, val, my_dict):
         for key, value in my_dict.items():
-            if val[0]==value[0] and val[1]==value[1]:
+            if val[0] == value[0] and val[1] == value[1]:
                 return key
 
-    def get_neighbor_ptnodes(self,node_pos):
-        neighbor_nodes=[]
+    def get_neighbor_ptnodes(self, node_pos):
+        neighbor_nodes = []
 
-        ptnode=self.get_key(node_pos,self.nodes)
+        ptnode = self.get_key(node_pos, self.nodes)
 
-        if ptnode==0:
-            neighbor_nodes=[1]
-        elif ptnode==1:
-            neighbor_nodes=[0,2,6]
-        elif ptnode==2:
-            neighbor_nodes=[1,3,15]
-        elif ptnode==3:
-            neighbor_nodes=[2,8,17]
-        elif ptnode==5:
-            neighbor_nodes=[27,12]
-        elif ptnode==6:
-            neighbor_nodes=[12,1]
-        elif ptnode==8:
-            neighbor_nodes=[3]
-        elif ptnode==12:
-            neighbor_nodes=[27,5,6,30,15]
-        elif ptnode==15:
-            neighbor_nodes=[2,12,16,30]
-        elif ptnode==16:
-            neighbor_nodes=[15,19,17]
-        elif ptnode==17:
-            neighbor_nodes=[16,18,3]
-        elif ptnode==18:
-            neighbor_nodes=[17,19,31]
-        elif ptnode==19:
-            neighbor_nodes=[16,18,31]
-        elif ptnode==20:
-            neighbor_nodes=[23,31]
-        elif ptnode==23:
-            neighbor_nodes=[20,31]
-        elif ptnode==27:
-            neighbor_nodes=[28,29,6,12]
-        elif ptnode==28:
-            neighbor_nodes=[27]
-        elif ptnode==29:
-            neighbor_nodes=[27]
-        elif ptnode==30:
-            neighbor_nodes=[12,15,31]
-        elif ptnode==31:
-            neighbor_nodes=[30,20,23,19,18]
+        if ptnode == 0:
+            neighbor_nodes = [1]
+        elif ptnode == 1:
+            neighbor_nodes = [0, 2, 6]
+        elif ptnode == 2:
+            neighbor_nodes = [1, 3, 15]
+        elif ptnode == 3:
+            neighbor_nodes = [2, 8, 17]
+        elif ptnode == 5:
+            neighbor_nodes = [27, 12]
+        elif ptnode == 6:
+            neighbor_nodes = [12, 1]
+        elif ptnode == 8:
+            neighbor_nodes = [3]
+        elif ptnode == 12:
+            neighbor_nodes = [27, 5, 6, 30, 15]
+        elif ptnode == 15:
+            neighbor_nodes = [2, 12, 16, 30]
+        elif ptnode == 16:
+            neighbor_nodes = [15, 19, 17]
+        elif ptnode == 17:
+            neighbor_nodes = [16, 18, 3]
+        elif ptnode == 18:
+            neighbor_nodes = [17, 19, 31]
+        elif ptnode == 19:
+            neighbor_nodes = [16, 18, 31]
+        elif ptnode == 20:
+            neighbor_nodes = [23, 31]
+        elif ptnode == 23:
+            neighbor_nodes = [20, 31]
+        elif ptnode == 27:
+            neighbor_nodes = [28, 29, 6, 12]
+        elif ptnode == 28:
+            neighbor_nodes = [27]
+        elif ptnode == 29:
+            neighbor_nodes = [27]
+        elif ptnode == 30:
+            neighbor_nodes = [12, 15, 31]
+        elif ptnode == 31:
+            neighbor_nodes = [30, 20, 23, 19, 18]
         else:
             raise Exception("it's not a patrolling point!")
-        nb_nodes=[]
-        for i in range(len(neighbor_nodes)) :
+        nb_nodes = []
+        for i in range(len(neighbor_nodes)):
             nb_nodes.append(self.nodes[neighbor_nodes[i]])
         return nb_nodes
 
-    def get_neighbor_nodes_number(self,ptnode):
+    def get_neighbor_nodes_number(self, ptnode):
         neighbor_nodes = []
 
         if ptnode == 0:
@@ -316,10 +310,7 @@ class Obstacle:
             raise Exception("it's not a patrolling point!")
         return neighbor_nodes
 
-
-
-
-    def dijkstra_raw(self, from_node,to_node):
+    def dijkstra_raw(self, from_node, to_node):
         g = defaultdict(list)
         for l, r, c in self.edges:
             g[l].append((c, r))
@@ -339,7 +330,7 @@ class Obstacle:
     def dijkstra(self, from_node, to_node):
         len_shortest_path = -1
         ret_path = []
-        length, path_queue = self.dijkstra_raw(from_node,to_node)
+        length, path_queue = self.dijkstra_raw(from_node, to_node)
         if len(path_queue) > 0:
             len_shortest_path = length  ## 1. Get the length firstly;
             ## 2. Decompose the path_queue, to get the passing nodes in the shortest path.
@@ -352,7 +343,6 @@ class Obstacle:
                 right = right[1]
             ret_path.reverse()  ## 3. Reverse the list finally, to make it be normal sequence.
         return len_shortest_path, ret_path
-
 
     def obstacle1(self):
         obsList = []
@@ -741,5 +731,4 @@ class Obstacle:
 
 obsMap = Obstacle()
 obsMap.getAllObs_vsbs(np.zeros((CONST.MAP_SIZE, CONST.MAP_SIZE)))
-#obsMaps, vsbs, vsbPolys, numOpenCellsArr = obsMap.getAllObs_vsbs(np.zeros((CONST.MAP_SIZE, CONST.MAP_SIZE)))
-
+# obsMaps, vsbs, vsbPolys, numOpenCellsArr = obsMap.getAllObs_vsbs(np.zeros((CONST.MAP_SIZE, CONST.MAP_SIZE)))

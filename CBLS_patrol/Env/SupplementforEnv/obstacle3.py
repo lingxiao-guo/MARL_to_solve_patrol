@@ -11,18 +11,17 @@ Created on Fri Feb  7 11:14:44 2020
 @author: amris
 """
 import math
-
-import skgeom as sg
-import numpy as np
-from matplotlib import pyplot as plt
 import sys
+
+import numpy as np
+
 sys.path.append("..")
 from Env.SupplementforEnv.constants import CONSTANTS as K
 from matplotlib.path import Path
-from collections import defaultdict
 from functools import partial
 from collections import defaultdict
 from heapq import *
+
 CONST = K()
 
 import time
@@ -33,11 +32,12 @@ from Env.SupplementforEnv.vsb2 import Visibility
 class Obstacle:
     def __init__(self):
 
-
-        self.nodes={0:[5,0],1:[14,0],2:[23,0],3:[32,0],4:[41,0],5:[5,9],6:[14,9],7:[23,9],8:[32,9],9:[41,9],10:[5,18],
-                    11:[14,18],12:[23,18],13:[32,18],14:[41,18],15:[5,27],16:[14,27],
-                    17:[23,27],18:[32,27],19:[41,27],20:[5,36],21:[14,36],22:[23,36],23:[32,36],24:[41,36]}
-        self.patrol_nodes=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
+        self.nodes = {0: [5, 0], 1: [14, 0], 2: [23, 0], 3: [32, 0], 4: [41, 0], 5: [5, 9], 6: [14, 9], 7: [23, 9],
+                      8: [32, 9], 9: [41, 9], 10: [5, 18],
+                      11: [14, 18], 12: [23, 18], 13: [32, 18], 14: [41, 18], 15: [5, 27], 16: [14, 27],
+                      17: [23, 27], 18: [32, 27], 19: [41, 27], 20: [5, 36], 21: [14, 36], 22: [23, 36], 23: [32, 36],
+                      24: [41, 36]}
+        self.patrol_nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
     def getAllObs_vsbs(self, emptyMap):
         obsMaps = []
@@ -124,16 +124,15 @@ class Obstacle:
 
     def get_allnodes_matrix(self):
 
-
-        neighbor_matrix=np.zeros((25,25),np.int32)
-        neighbor_matrix[0,1]=9
+        neighbor_matrix = np.zeros((25, 25), np.int32)
+        neighbor_matrix[0, 1] = 9
         neighbor_matrix[0, 5] = 9
-        neighbor_matrix[1,6]=9
+        neighbor_matrix[1, 6] = 9
         neighbor_matrix[2, 7] = 9
         neighbor_matrix[2, 3] = 9
         neighbor_matrix[3, 8] = 9
         neighbor_matrix[3, 4] = 9
-        neighbor_matrix[4,9] = 9
+        neighbor_matrix[4, 9] = 9
         neighbor_matrix[5, 6] = 9
         neighbor_matrix[5, 10] = 9
         neighbor_matrix[6, 7] = 9
@@ -148,7 +147,7 @@ class Obstacle:
         neighbor_matrix[11, 16] = 9
         neighbor_matrix[12, 17] = 9
         neighbor_matrix[13, 14] = 9
-        neighbor_matrix[13, 18] =9
+        neighbor_matrix[13, 18] = 9
         neighbor_matrix[14, 19] = 9
         neighbor_matrix[15, 16] = 9
         neighbor_matrix[15, 20] = 9
@@ -164,46 +163,42 @@ class Obstacle:
         neighbor_matrix[22, 23] = 9
         neighbor_matrix[23, 24] = 9
 
-
-        self.neighbor_matrix=neighbor_matrix+neighbor_matrix.T
-        self.neighbor_matrix=np.where(self.neighbor_matrix==0,math.inf,self.neighbor_matrix)
-        for i in range(np.size(self.neighbor_matrix,0)):
-            self.neighbor_matrix[i][i]=0
+        self.neighbor_matrix = neighbor_matrix + neighbor_matrix.T
+        self.neighbor_matrix = np.where(self.neighbor_matrix == 0, math.inf, self.neighbor_matrix)
+        for i in range(np.size(self.neighbor_matrix, 0)):
+            self.neighbor_matrix[i][i] = 0
 
         self.edges = []
-        for i in range(np.size(self.neighbor_matrix,0)):
-            for j in range(np.size(self.neighbor_matrix,1)):
+        for i in range(np.size(self.neighbor_matrix, 0)):
+            for j in range(np.size(self.neighbor_matrix, 1)):
                 if i != j and self.neighbor_matrix[i][j] != math.inf:
                     self.edges.append(
-                        (i, j, self.neighbor_matrix[i][j]))  ### (i,j) is a link; M_topo[i][j] here is 1, the length of link (i,j).
-        adj=np.zeros((25,25),dtype=int)
+                        (i, j, self.neighbor_matrix[i][
+                            j]))  ### (i,j) is a link; M_topo[i][j] here is 1, the length of link (i,j).
+        adj = np.zeros((25, 25), dtype=int)
 
+        adj = np.where(self.neighbor_matrix == 9, 1, adj)
+        self.adj = adj
 
-        adj=np.where(self.neighbor_matrix==9,1,adj)
-        self.adj=adj
-
-
-
-
-    def get_key(self,val,my_dict):
+    def get_key(self, val, my_dict):
         for key, value in my_dict.items():
-            if val[0]==value[0] and val[1]==value[1]:
+            if val[0] == value[0] and val[1] == value[1]:
                 return key
 
-    def get_neighbor_ptnodes(self,node_pos):
-        neighbor_nodes=[]
+    def get_neighbor_ptnodes(self, node_pos):
+        neighbor_nodes = []
 
-        ptnode=self.get_key(node_pos,self.nodes)
-        idx=np.nonzero(self.adj[int(ptnode)])
+        ptnode = self.get_key(node_pos, self.nodes)
+        idx = np.nonzero(self.adj[int(ptnode)])
         for item in idx[0]:
             neighbor_nodes.append(item)
 
-        nb_nodes=[]
-        for i in range(len(neighbor_nodes)) :
+        nb_nodes = []
+        for i in range(len(neighbor_nodes)):
             nb_nodes.append(self.nodes[neighbor_nodes[i]])
         return nb_nodes
 
-    def get_neighbor_nodes_number(self,ptnode):
+    def get_neighbor_nodes_number(self, ptnode):
         neighbor_nodes = []
 
         idx = np.nonzero(self.adj[int(ptnode)])
@@ -212,10 +207,7 @@ class Obstacle:
 
         return neighbor_nodes
 
-
-
-
-    def dijkstra_raw(self, from_node,to_node):
+    def dijkstra_raw(self, from_node, to_node):
         g = defaultdict(list)
         for l, r, c in self.edges:
             g[l].append((c, r))
@@ -235,7 +227,7 @@ class Obstacle:
     def dijkstra(self, from_node, to_node):
         len_shortest_path = -1
         ret_path = []
-        length, path_queue = self.dijkstra_raw(from_node,to_node)
+        length, path_queue = self.dijkstra_raw(from_node, to_node)
         if len(path_queue) > 0:
             len_shortest_path = length  ## 1. Get the length firstly;
             ## 2. Decompose the path_queue, to get the passing nodes in the shortest path.
@@ -248,7 +240,6 @@ class Obstacle:
                 right = right[1]
             ret_path.reverse()  ## 3. Reverse the list finally, to make it be normal sequence.
         return len_shortest_path, ret_path
-
 
     def patrol_pts(self):
         pt0 = []
@@ -336,7 +327,6 @@ class Obstacle:
                 ]
         obsList.append([geom, isHole])
 
-
         geom = [[33, 1],
                 [33, 9],
                 [41, 9],
@@ -370,11 +360,11 @@ class Obstacle:
         obsList.append([geom, isHole])
 
         geom = [
-                [15,0],
-                [15,9],
-                [23,9],
-                [23,0]
-                ]
+            [15, 0],
+            [15, 9],
+            [23, 9],
+            [23, 0]
+        ]
         obsList.append([geom, isHole])
 
         geom = [
@@ -382,21 +372,19 @@ class Obstacle:
             [5, 19],
             [14, 19],
             [14, 27],
-            [5,27],
-            [5,37],
-            [42,37],
-            [42,0],
-            [50,0],
-            [50,50],
-            [0,50],
-            [0,0]
+            [5, 27],
+            [5, 37],
+            [42, 37],
+            [42, 0],
+            [50, 0],
+            [50, 50],
+            [0, 50],
+            [0, 0]
         ]
         obsList.append([geom, isHole])
 
         return obsList
 
+
 obsMap = Obstacle()
 obsMaps, vsbs, vsbPolys, numOpenCellsArr = obsMap.getAllObs_vsbs(np.zeros((CONST.MAP_SIZE, CONST.MAP_SIZE)))
-
-
-

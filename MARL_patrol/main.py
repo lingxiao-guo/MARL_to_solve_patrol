@@ -1,11 +1,9 @@
-import os
-import sys
 import argparse
+
 from trainer.asy_ppo import asy_trainer
-from trainer.sy_ppo import sy_trainer  #参数就通过这个往里边传，说明这个类要含有所有其他类的接口
+from trainer.sy_ppo import sy_trainer  # 参数就通过这个往里边传，说明这个类要含有所有其他类的接口
 
-
-parser=argparse.ArgumentParser(description = 'train')
+parser = argparse.ArgumentParser(description='train')
 parser.add_argument('--graph_size', type=int, default=20, help="size of the problem graph")
 parser.add_argument('--lr', type=int, default=0.000025, help="learning rate")
 parser.add_argument('--num_input', type=int, default=5, help="dimension of network input")
@@ -27,17 +25,15 @@ parser.add_argument('--patience', type=int, default=800, help="scheduler decreas
 parser.add_argument('--clip_coef', type=int, default=0.05, help="PPO clip factor")
 parser.add_argument('--patrol_mode', type=str, default='asynchronous', help="The mode of multi-robots' patrol")
 
-args=parser.parse_args()
+args = parser.parse_args()
 
 if __name__ == "__main__":
 
-    mode=args.patrol_mode
+    mode = args.patrol_mode
 
-    if mode ==  "asynchronous":
-        asy_tr=asy_trainer(args)
+    if mode == "asynchronous":
+        asy_tr = asy_trainer(args)
         asy_tr.train()
     else:
-        sy_tr=sy_trainer(args)
+        sy_tr = sy_trainer(args)
         sy_tr.train()
-
-    

@@ -1,19 +1,19 @@
-import torch
-import torch.nn.functional as F
-import numpy as np
-from matplotlib import pyplot as plt
 import os
+
+import numpy as np
+import torch
+from matplotlib import pyplot as plt
+
 from Env.env import obsMap
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-import math
 
-from torch.distributions.categorical import Categorical
 import time
 from Env.env import Env
 from CBLS_policy import ConcurrentBayesianLearning
 from CBLS_policy import get_key
 from Env.env import CONST
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 if __name__ == "__main__":
